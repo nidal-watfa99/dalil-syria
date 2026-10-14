@@ -24,30 +24,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Unzip source
-        run: |
-          ZIP=$(ls *.zip | head -n 1)
-          echo "Using archive: $ZIP"
-          mkdir -p _src
-          unzip -q -o "$ZIP" -d _src
-          if [ -f _src/package.json ]; then
-            echo "APP_DIR=_src" >> "$GITHUB_ENV"
-          else
-            PKG=$(find _src -maxdepth 3 -name package.json -not -path '*/node_modules/*' | head -n 1)
-            echo "APP_DIR=$(dirname "$PKG")" >> "$GITHUB_ENV"
-          fi
-
-      - name: Apply GitHub Pages Vite config
-        run: cp vite.config.pages.ts "$APP_DIR/vite.config.ts"
-
       - name: Install dependencies
         run: |
-          cd "$APP_DIR"
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Build
         run: |
-          cd "$APP_DIR"
           REPO="${GITHUB_REPOSITORY#*/}"
           if [[ "$REPO" == *.github.io ]]; then
             export BASE_PATH="/"
@@ -61,7 +43,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ env.APP_DIR }}/dist
+          path: dist
 
   deploy:
     needs: build
