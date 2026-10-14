@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0B0F17" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#92400E" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="subtleDrop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background Base with subtle border -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGlow)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#D4AF37" stroke-width="2.5" stroke-opacity="0.45" />
+
+  <!-- Outer Layered Precision Ring -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="8 6" />
+  <circle cx="256" cy="256" r="172" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-opacity="0.8" />
+
+  <!-- Shield Base Contour -->
+  <path d="M256 100 L370 148 V252 C370 334 318 392 256 422 C194 392 142 334 142 252 V148 Z" 
+        fill="#111827" stroke="url(#goldGrad)" stroke-width="4" filter="url(#subtleDrop)" />
+
+  <!-- Shield Inset -->
+  <path d="M256 122 L350 162 V248 C350 316 308 368 256 394 C204 368 162 316 162 248 V162 Z" 
+        fill="#0F172A" stroke="#1E293B" stroke-width="2" />
+
+  <!-- Central Syrian Map Compass Pin & Star Element -->
+  <g transform="translate(256, 252) scale(1.1)">
+    <!-- Location Pin Base -->
+    <path d="M0 -76 C-34 -76 -60 -48 -60 -14 C-60 28 0 78 0 78 C0 78 60 28 60 -14 C60 -48 34 -76 0 -76 Z" 
+          fill="url(#goldGrad)" />
+    <!-- Pin Inset Circle -->
+    <circle cx="0" cy="-14" r="28" fill="#0B0F17" />
+    
+    <!-- Syrian National Star in Gold & Emerald -->
+    <!-- Center 5-pointed star -->
+    <polygon points="0,-32 4.5,-18 19,-18 7,-9 11.5,5 0,-3 -11.5,5 -7,-9 -19,-18 -4.5,-18" 
+             fill="url(#emeraldGrad)" />
+  </g>
+
+  <!-- Precision Cardinal Marks -->
+  <circle cx="256" cy="80" r="5" fill="#D4AF37" />
+  <circle cx="256" cy="432" r="5" fill="#D4AF37" />
+  <circle cx="80" cy="256" r="5" fill="#D4AF37" />
+  <circle cx="432" cy="256" r="5" fill="#D4AF37" />
+</svg>

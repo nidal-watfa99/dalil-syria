@@ -1,0 +1,95 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  :root {
+    --font-arabic: 'Cairo', system-ui, -apple-system, sans-serif;
+    --font-latin: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-arabic);
+    overflow-x: hidden;
+  }
+}
+
+/* Precision Layered UI frosted glass utilities */
+.glass-panel {
+  background-color: rgba(17, 24, 39, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.light .glass-panel {
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+/* Glass card with micro elevation */
+.glass-card {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.45);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+}
+
+.light .glass-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
+}
+
+/* Recessed input surfaces */
+.recessed-field {
+  background-color: rgba(11, 15, 23, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+.light .recessed-field {
+  background-color: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(203, 213, 225, 0.85);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+/* Leaflet dark mode and marker adjustments */
+.custom-leaflet-marker,
+.user-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  z-index: 10;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 350px;
+}
+
+.dark .leaflet-tile {
+  filter: brightness(0.85) contrast(1.15);
+}
