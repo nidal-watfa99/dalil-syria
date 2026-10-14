@@ -1,0 +1,74 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unzip source
+        run: |
+          ZIP=$(ls *.zip | head -n 1)
+          echo "Using archive: $ZIP"
+          mkdir -p _src
+          unzip -q -o "$ZIP" -d _src
+          if [ -f _src/package.json ]; then
+            echo "APP_DIR=_src" >> "$GITHUB_ENV"
+          else
+            PKG=$(find _src -maxdepth 3 -name package.json -not -path '*/node_modules/*' | head -n 1)
+            echo "APP_DIR=$(dirname "$PKG")" >> "$GITHUB_ENV"
+          fi
+
+      - name: Apply GitHub Pages Vite config
+        run: cp vite.config.pages.ts "$APP_DIR/vite.config.ts"
+
+      - name: Install dependencies
+        run: |
+          cd "$APP_DIR"
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Build
+        run: |
+          cd "$APP_DIR"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO" == *.github.io ]]; then
+            export BASE_PATH="/"
+          else
+            export BASE_PATH="/${REPO}/"
+          fi
+          echo "BASE_PATH=$BASE_PATH"
+          npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.APP_DIR }}/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
