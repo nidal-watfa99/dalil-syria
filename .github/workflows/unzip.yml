@@ -1,0 +1,101 @@
+name: Unzip source
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.zip'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract zip into repository root and delete it
+        run: |
+          ZIP=$(ls *.zip 2>/dev/null | head -n 1)
+          if [ -z "$ZIP" ]; then
+            echo "No zip file found in repository root"
+            exit 1
+          fi
+          echo "Extracting: $ZIP"
+          rm -rf "$RUNNER_TEMP/src"
+          mkdir -p "$RUNNER_TEMP/src"
+          unzip -q -o "$ZIP" -d "$RUNNER_TEMP/src"
+
+          PKG=$(find "$RUNNER_TEMP/src" -maxdepth 3 -name package.json -not -path '*/node_modules/*' | head -n 1)
+          if [ -z "$PKG" ]; then
+            echo "package.json not found inside the zip"
+            exit 1
+          fi
+          SRC=$(dirname "$PKG")
+
+          rm -rf "$SRC/node_modules"
+          cp -a "$SRC"/. .
+          git rm -q --cached "$ZIP" || true
+          rm -f "$ZIP"
+
+      - name: Configure Vite for GitHub Pages
+        run: |
+          cat > vite.config.ts <<'EOF'
+          import tailwindcss from '@tailwindcss/vite';
+          import react from '@vitejs/plugin-react';
+          import { VitePWA } from 'vite-plugin-pwa';
+          import path from 'path';
+          import { defineConfig } from 'vite';
+
+          const base = process.env.BASE_PATH || '/';
+
+          export default defineConfig({
+            base,
+            plugins: [
+              react(),
+              tailwindcss(),
+              VitePWA({
+                registerType: 'autoUpdate',
+                includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
+                manifest: {
+                  id: base,
+                  name: 'دليل سوريا | DALIL SYRIA',
+                  short_name: 'دليل سوريا',
+                  description: 'الدليل الوطني الرقمي الشامل للخدمات والمعاملات والجهات والخرائط في الجمهورية العربية السورية',
+                  theme_color: '#0b0f17',
+                  background_color: '#0b0f17',
+                  display: 'standalone',
+                  start_url: base,
+                  scope: base,
+                  lang: 'ar',
+                  dir: 'rtl',
+                  icons: [
+                    { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+                    { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+                    { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+                  ],
+                },
+              }),
+            ],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, '.'),
+              },
+            },
+          });
+          EOF
+
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Extract source from zip and configure for GitHub Pages"
+          git push
+
+      - name: Trigger deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
