@@ -1,175 +1,177 @@
-export interface Governorate {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  capitalAr: string;
-  lat: number;
-  lng: number;
-  zoom: number;
-  districts: string[];
-  descriptionAr: string;
-  populationEst?: string;
-}
-
-export interface Category {
-  id: string;
-  titleAr: string;
-  titleEn: string;
-  icon: string;
-  descriptionAr: string;
-  order: number;
-}
-
-export interface Authority {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  categoryId: string;
-  governorateId: string;
-  district: string;
-  address: string;
-  phone: string;
-  workingHours: string;
-  lat: number;
-  lng: number;
-  isVerified: boolean;
-  verificationSource: string;
-  verificationDate: string;
-  website?: string;
-  notes?: string;
-}
-
-export interface RequiredDocument {
-  id: string;
-  nameAr: string;
-  isOriginal: boolean;
-  copiesCount: number;
-  needsAttestation: boolean;
-  attestationEntity?: string;
-  notes?: string;
-}
-
-export interface ProcedureStep {
-  stepNumber: number;
-  title: string;
-  description: string;
-  locationName?: string;
-}
-
-export interface OfficialFee {
-  item: string;
-  amount: number;
-  currency: 'SYP' | 'USD';
-  legalReference: string;
-  paymentMethod: string;
-  effectiveDate: string;
-}
+export type TransactionStatus = 'متاحة' | 'متوقفة' | 'غير متحقق منها';
 
 export interface Transaction {
   id: string;
-  titleAr: string;
-  titleEn: string;
-  commonNames: string[];
-  synonyms: string[];
-  categoryId: string;
-  responsibleAuthority: string;
-  summaryAr: string;
-  eligibility: string;
-  requiredDocuments: RequiredDocument[];
-  steps: ProcedureStep[];
-  officialFees: OfficialFee[];
-  processingTimeOfficial: string;
-  processingTimeEstimated: string;
-  personalAttendanceRequired: boolean;
-  powerOfAttorneyAllowed: boolean;
-  appointmentRequired: boolean;
-  formsAvailable: Array<{ title: string; formCode?: string; downloadUrl?: string }>;
-  submittingEntity: string;
-  issuingEntity: string;
-  commonRejectionReasons: string[];
-  officialPortalUrl?: string;
-  verificationStatus: 'verified' | 'under_review' | 'deprecated';
-  sourceName: string;
-  sourceUrl?: string;
-  legalBasisNumber: string;
-  lastVerifiedDate: string;
-  nextReviewDate: string;
-  relatedAuthorityIds: string[];
-  governorateNotes?: Record<string, string>;
-}
-
-export interface VisaGuide {
-  id: string;
-  countryCode: string;
-  countryNameAr: string;
-  countryNameEn: string;
-  visaType: string;
-  purposeAr: string;
-  officialRequirements: string[];
-  requiredDocuments: string[];
-  fees: {
-    amount: string;
-    currency: string;
-    paymentMethod: string;
-    legalReference: string;
+  name: string;
+  category: string;
+  ministryId: string;
+  ministryName: string;
+  responsibleEntity: string; // المديرية أو الإدارة المختصة
+  conditions: string[]; // الشروط والأهلية
+  steps: string[]; // خطوات التقديم
+  requiredDocuments: {
+    name: string;
+    isOriginal: boolean; // أصل أم صورة مصدقة
+    notes?: string;
+  }[];
+  fee: {
+    amount: number;
+    currency: 'ليرة سورية' | 'دولار أمريكي';
+    formattedFee: string;
+    effectiveDate: string; // تاريخ سريان الرسم (مثال: 2026)
+    source: string; // المرسوم أو القرار الرسمي
+    feeType: 'رسم رسمي' | 'طابع ورسم إضافي' | 'قيمة استمارة';
   };
-  processingLocationForSyrians: string;
-  doesProcessSyrianCitizensCurrently: boolean;
-  officialEmbassyUrl: string;
-  officialAppointmentPortalUrl: string;
-  antiFraudWarning: string;
-  lastVerifiedDate: string;
+  expectedDuration: string; // المدة المتوقعة
+  submissionPlace: string; // مكان تقديم الطلب (مركز خدمة المواطن، فرع الهجرة، إلخ)
+  governorateScope: 'كافة المحافظات' | string; // المحافظة المعنية
+  district?: string;
+  subDistrict?: string;
+  branches: {
+    name: string;
+    address: string;
+    phone?: string;
+    workingHours?: string;
+  }[];
+  officialLinks: {
+    title: string;
+    url: string;
+  }[];
+  legalReferences: string; // المرجع القانوني أو رقم المرسوم
+  lastVerifiedDate: string; // تاريخ آخر تحقق (2026)
+  status: TransactionStatus;
+  notes?: string;
+  keywords?: string[]; // كلمات مفتاحية ومرادفات بحث شائعة (مثل: حصر ارث، قسام شرعي، تركة)
+}
+
+export interface Ministry {
+  id: string;
+  name: string;
+  arabicCode: string;
+  officialWebsite: string;
+  ministerName?: string;
+  address: string;
+  hotline: string;
+  directoratesCount: number;
+  transactionsCount: number;
+  coverageStatus: 'مكتمل التحقق' | 'تحقق جزئي' | 'قيد الجرد والمراجعة';
+  coveragePercentage: number;
+  lastCheckedDate: string;
+  checkStatus: 'مستقر ومتصل' | 'تعذر الاتصال' | 'بيانات مؤرخة 2026';
+  directorates: {
+    id: string;
+    name: string;
+    responsibility: string;
+    transactions: string[];
+  }[];
+}
+
+export interface Governorate {
+  id: string;
+  name: string;
+  center: string; // مركز المحافظة
+  districts: {
+    name: string;
+    subDistricts: string[];
+  }[];
+  citizenServiceCenters: {
+    name: string;
+    address: string;
+    phone?: string;
+    hours: string;
+    servicesOffered: string[];
+  }[];
+  majorTransportHubs: string[];
+  verificationStatus: 'بيانات مؤكدة ومحدثة' | 'بيانات جزئية قيد التحديث';
+  coordinates: [number, number]; // [lat, lng]
+}
+
+export interface PriceItem {
+  id: string;
+  title: string;
+  category: 'رسوم حكومية' | 'تكاسي وسيارات أجرة' | 'نقل بين المحافظات' | 'طيران داخلي ودولي' | 'تأشيرات ومكاتب';
+  price: string;
+  currency: string;
+  rateType: 'تعرفة رسمية ملزمة' | 'سعر مزود الخدمة' | 'تقديري حسب المسافة';
+  effectiveDate: string;
   source: string;
-}
-
-export interface TransportFare {
-  id: string;
-  fromGovernorate: string;
-  toGovernorate: string;
-  routeNameAr: string;
-  distanceKm: number;
-  estimatedDurationHours: number;
-  departureStation: string;
-  arrivalStation: string;
-  officialTariffSyp: number;
-  serviceClass: 'بولمان رجال أعمال (VIP)' | 'بولمان عادي' | 'ميكروباص / فان';
-  licensedOperators: string[];
-  legalDecree: string;
-  tariffEffectiveDate: string;
-  lastVerifiedDate: string;
-  source: string;
-  luggageAllowanceKg: number;
-}
-
-export interface InaccuracyReport {
-  id: string;
-  targetType: 'transaction' | 'authority' | 'transport' | 'visa' | 'general';
-  targetId: string;
-  targetName: string;
-  reporterName?: string;
-  reporterContact?: string;
-  issueCategory: 'fees' | 'documents' | 'address_hours' | 'broken_link' | 'status_changed' | 'other';
-  description: string;
-  proposedCorrection?: string;
-  status: 'pending' | 'reviewed' | 'resolved' | 'rejected';
-  createdAt: string;
-}
-
-export interface AuditLog {
-  id: string;
-  timestamp: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  user: string;
+  lastVerified: string;
   details: string;
+  formulaOrBreakdown?: string;
 }
 
-export interface DiagnosticLog {
+export interface TransportRoute {
   id: string;
-  timestamp: string;
-  level: 'info' | 'warn' | 'error';
-  context: string;
-  message: string;
-  meta?: unknown;
+  title: string;
+  type: 'بولمان بين المحافظات' | 'سرفيس / ميكروباص' | 'سكك حديدية' | 'نقل بحري' | 'سيارات أجرة محددة';
+  origin: string;
+  destination: string;
+  duration: string;
+  distanceKm?: number;
+  priceFormatted: string;
+  operatingCompanies: string[];
+  departureStations: string[];
+  arrivalStations: string[];
+  schedule: string;
+  status: 'عامل بانتظام' | 'محدود / حسب الطلب' | 'متوقف مؤقتاً';
+  sourceAndDate: string;
+}
+
+export interface MapPoint {
+  id: string;
+  name: string;
+  category: 'وزارة' | 'مركز خدمة مواطن' | 'هجرة وجوازات' | 'كراج ونقل' | 'مطار' | 'مرفأ بحري' | 'قضاء ومحكمة';
+  governorate: string;
+  address: string;
+  phone?: string;
+  coordinates: [number, number]; // [lat, lng]
+  hours?: string;
+  notes?: string;
+}
+
+export interface VisaItem {
+  id: string;
+  country: string;
+  visaType: string;
+  officialRequirements: string[];
+  officialFees: string;
+  agencyFeesEstimate: string;
+  processingTime: string;
+  applicationMode: 'إلكتروني' | 'عبر السفارة' | 'عند الوصول' | 'مكاتب وسيطة معتمدة';
+  officialPortalUrl?: string;
+  verifiedDate: string;
+  notes: string;
+}
+
+export interface AsylumGuideItem {
+  id: string;
+  title: string;
+  organization: string;
+  targetCountryOrScope: string;
+  officialProcedures: string[];
+  requiredDocumentation: string[];
+  warningAgainstFraud: string;
+  officialContacts: {
+    type: string;
+    detail: string;
+  }[];
+  lastUpdated: string;
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  summary: string;
+  date: string;
+  category: 'رسوم ومعاملات' | 'مواعيد وخدمات' | 'نقل وطرق' | 'تحديثات التطبيق';
+  isRead: boolean;
+  relatedTransactionId?: string;
+}
+
+export interface DiagnosticItem {
+  feature: string;
+  status: 'يعمل بكفاءة' | 'يحتاج إذن' | 'غير متاح حالياً' | 'غير مفعل';
+  details: string;
+  technicalCode: string;
+  lastCheckTime: string;
 }

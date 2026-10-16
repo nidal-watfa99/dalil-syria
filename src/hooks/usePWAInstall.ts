@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { logDiagnostic } from '../utils/storageAndLogs';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -26,13 +25,11 @@ export function usePWAInstall() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      logDiagnostic('info', 'PWA', 'beforeinstallprompt event captured and ready for user trigger');
     };
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      logDiagnostic('info', 'PWA', 'Application successfully installed to home screen / app launcher');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -44,14 +41,10 @@ export function usePWAInstall() {
     };
   }, []);
 
-  const install = async (): Promise<boolean> => {
-    if (!deferredPrompt) {
-      logDiagnostic('warn', 'PWA', 'Install clicked but no deferred prompt available');
-      return false;
-    }
+  const install = async () => {
+    if (!deferredPrompt) return false;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    logDiagnostic('info', 'PWA', `User responded to install prompt: ${outcome}`);
     if (outcome === 'accepted') {
       setIsInstalled(true);
       setDeferredPrompt(null);

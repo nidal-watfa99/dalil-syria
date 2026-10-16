@@ -1,6 +1,6 @@
 {
-  "name": "دليل سوريا | DALIL SYRIA",
-  "description": "دليل وطني رقمي شامل للخدمات والمعاملات والجهات الحكومية والخاصة ونظم المعلومات الجغرافية والنقل في الجمهورية العربية السورية.",
-  "requestFramePermissions": ["geolocation"],
+  "name": "DALIL SYRIA | دليل سوريا",
+  "description": "دليل المعاملات الحكومية السورية والخدمات والأسعار والمحافظات والنقل والذكاء الاصطناعي — إصدار 2026",
+  "requestFramePermissions": ["geolocation", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
