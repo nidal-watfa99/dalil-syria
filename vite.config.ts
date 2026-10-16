@@ -4,6 +4,8 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
+// GitHub Pages serves the site under /<repo>/ ; the deploy workflow exports BASE_PATH for that.
+// Locally / on a Node host it defaults to '/'.
 const rawBase = process.env.BASE_PATH || '/';
 const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
 const escapeRe = (t: string) => t.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
@@ -33,17 +35,35 @@ export default defineConfig(() => {
           start_url: `${base}?source=pwa`,
           scope: base,
           icons: [
-            { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: 'pwa-maskable-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
+            },
           ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          // Updated workers take over immediately and old precaches are purged, so stale
+          // versions cannot leave a blank screen after a deploy.
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
           navigateFallback: `${base}index.html`,
+          // API calls must always hit the network (never serve the SPA shell / cached AI answers).
           navigateFallbackDenylist: [new RegExp('^' + escapeRe(base) + 'api/')],
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           runtimeCaching: [
@@ -52,8 +72,13 @@ export default defineConfig(() => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'google-fonts-cache',
-                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                cacheableResponse: { statuses: [0, 200] },
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
               },
             },
             {
@@ -61,13 +86,21 @@ export default defineConfig(() => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'gstatic-fonts-cache',
-                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                cacheableResponse: { statuses: [0, 200] },
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
               },
             },
           ],
         },
-        devOptions: { enabled: false },
+        // The service worker is intentionally disabled in dev to avoid stale-cache blank screens.
+        devOptions: {
+          enabled: false,
+        },
       }),
     ],
     resolve: {
@@ -76,8 +109,10 @@ export default defineConfig(() => {
       },
     },
     server: {
+      // HMR is disabled in AI Studio via DISABLE_HMR env var.
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };
 });
+
